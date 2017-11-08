@@ -2,7 +2,9 @@ const express = require('express');
 const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
-const app     = express();
+const app = express();
+const _ = require('lodash');
+const EMPTY_STRING = '';
 
 app.get('/feed', function(req, res, page){
   // The URL we will scrape from - in our example The scores.
@@ -20,18 +22,27 @@ app.get('/feed', function(req, res, page){
       if(!error){
           // Next, we'll utilize the cheerio library on the returned html which will essentially give us jQuery functionality
 
-          var $ = cheerio.load(html);
+          const $ = cheerio.load(html);
 
           // Finally, we'll define the variables we're going to capture
 
-          var title, date, feedImgSrc, link;
-          var json = { title : "", release : "", rating : ""};
-          console.log($);
-      }
-  })
-})
+          let title, date, feedImgSrc, link;
+          $('.article-tile-wrapper').filter(function() {
 
-app.listen('9000')
+              // Let's store the data we filter into a variable so we can easily see what's going on.
+
+              const data = $(this);
+              const articleTitle = data.find('.article-headline');
+              const articleImg = data.find('img');
+
+              title = articleTitle ? articleTitle.text() : EMPTY_STRING;
+              feedImgSrc = _.get(articleImg, '[0].attribs.src', EMPTY_STRING);
+          });
+      }
+  });
+});
+
+app.listen('9000');
 
 console.log('Magic happens on port 9000');
 

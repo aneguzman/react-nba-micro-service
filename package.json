@@ -4,10 +4,10 @@
   "description": "React NBA micro service to handle React NBA App requests.",
   "author": "Aneudy Guzman",
   "license": "MIT",
-  "dependencies" : {
-    "express"    : "latest",
-    "request"    : "latest",
-    "cheerio"    : "latest"
+  "dependencies": {
+    "cheerio": "latest",
+    "express": "^4.16.2",
+    "request": "latest"
   },
   "devDependencies": {
     "eslint": "^4.4.1",
