@@ -3,47 +3,61 @@ const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
 const app = express();
+const port = 9000;
+const open = require('open');
 const _ = require('lodash');
 const EMPTY_STRING = '';
+const EMPTY_ARRAY = [];
+const FEED_API_URL = 'https://www.thescore.com/nba/news?page=';
+const STANDINGS_API_URL = 'http://data.nba.net/10s/prod/v1/current/standings_conference.json';
 
-app.get('/feed', function(req, res, page){
-  // The URL we will scrape from - in our example The scores.
-
-  const feedUrl = 'https://www.thescore.com/nba/news';
-
-  // The structure of our request call
-  // The first parameter is our URL
-  // The callback function takes 3 parameters, an error, response status code and the html
-
-  request(feedUrl, function(error, response, html){
-
-      // First we'll check to make sure no errors occurred when making the request
-
-      if(!error){
-          // Next, we'll utilize the cheerio library on the returned html which will essentially give us jQuery functionality
-
-          const $ = cheerio.load(html);
-
-          // Finally, we'll define the variables we're going to capture
-
-          let title, date, feedImgSrc, link;
-          $('.article-tile-wrapper').filter(function() {
-
-              // Let's store the data we filter into a variable so we can easily see what's going on.
-
-              const data = $(this);
-              const articleTitle = data.find('.article-headline');
-              const articleImg = data.find('img');
-
-              title = articleTitle ? articleTitle.text() : EMPTY_STRING;
-              feedImgSrc = _.get(articleImg, '[0].attribs.src', EMPTY_STRING);
-          });
-      }
+app.get('/api/scores/', function(req, res) {
+  let currentDate = req.param('date');
+  request(getScoresApiUrl(currentDate), function(error, response, body) {
+    res.json(body);
   });
 });
 
-app.listen('9000');
+app.get('/api/standings/', function(req, res) {
+  request(STANDINGS_API_URL, function(error, response, body) {
+    res.json(body);
+  });
+});
 
-console.log('Magic happens on port 9000');
+app.get('/api/feed', function(req, res) {
+  const page = req.param('page');
+  request(getFeedsApiUrl(page), function(error, response, body){
+    if(!error){
+      const $ = cheerio.load(body);
+      let title = EMPTY_STRING;
+      let imgSrc = EMPTY_STRING;
+      let jsonObj = {
+        articles: EMPTY_ARRAY
+      };
+      $('.article-tile-wrapper').filter(function() {
+        const article = $(this);
+        const articleTitle = article.find('.article-headline');
+        const articleImg = article.find('img');
+        title = articleTitle ? articleTitle.text() : EMPTY_STRING;
+        imgSrc = _.get(articleImg, '[0].attribs.src', EMPTY_STRING);
+        jsonObj.articles.push({
+          title, 
+          imgSrc,
+        });
+      });
 
-exports = module.exports = app;
+      res.json(jsonObj);
+    }
+  });
+});
+
+const getScoresApiUrl = (date) => `http://data.nba.net/prod/v1/${date}/scoreboard.json`;
+const getFeedsApiUrl = (page) => `${FEED_API_URL}${page}`;
+
+app.listen(port, function(err) {
+  if (err) {
+    console.log(err);
+  } else {
+    open(`http://localhost:${port}`);
+  }
+});
