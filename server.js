@@ -12,6 +12,16 @@ const STANDINGS_API_URL = 'http://data.nba.net/10s/prod/v1/current/standings_con
 const getScoresApiUrl = date => `http://data.nba.net/prod/v1/${date}/scoreboard.json`;
 const getFeedsApiUrl = page => `${FEED_API_URL}${page}`;
 
+
+/**
+ * Configuring Cors
+ */
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 /**
  * Request the list of NBA scores for a given date.
  * @param {string} date - the date of the scores.
@@ -50,6 +60,7 @@ app.get('/api/feed', (req, res) => {
           selector: '.article-thumbnail > img',
           attr: 'src',
         },
+        pubDate: '.article-details time'
       },
     },
   })
