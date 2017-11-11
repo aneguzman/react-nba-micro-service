@@ -1,6 +1,7 @@
 const express = require('express');
 const request = require('request');
 const scrape = require('scrape-it');
+const uuid = require('uuid/v1');
 require('dotenv').config();
 
 const app = express();
@@ -14,7 +15,7 @@ const getFeedsApiUrl = page => `${FEED_API_URL}${page}`;
 
 
 /**
- * Configuring Cors
+ * CORS configuration
  */
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -60,11 +61,16 @@ app.get('/api/feed', (req, res) => {
           selector: '.article-thumbnail > img',
           attr: 'src',
         },
-        pubDate: '.article-details time'
+        pubDate: '.article-details time',
       },
     },
   })
-    .then(article => res.json(article));
+    .then((data) => {
+      data.articles.forEach((article) => {
+        article.id = uuid();
+      });
+      return res.json(data);
+    });
 });
 
 app.listen(port, (err) => {
