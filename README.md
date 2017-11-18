@@ -29,15 +29,15 @@ NBA React API based on Node js to get news, scores, standings data from the NBA.
 ## API Routes
 
 - GET:api/scores
-  -Returns the list of game scores for a give date
-  -Payload:
-    -date (in '20171125' format)
+  - Returns the list of game scores for a give date
+  - Payload:
+    - date (in '20171125' format)
 
 - GET:api/standings
-  -Returns the list of team standings for each NBA conference
+  - Returns the list of team standings for each NBA conference
 
 - GET:api/feed
-  -Returns the list of latest news in the NBA
-  -Payload:
-    -page
+  - Returns the list of latest news in the NBA
+  - Payload:
+    - page
     
